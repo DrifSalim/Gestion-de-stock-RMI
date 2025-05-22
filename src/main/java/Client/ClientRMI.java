@@ -26,7 +26,7 @@ public class ClientRMI {
 
 
             // Connexion au serveur RMI
-            Registry registry = LocateRegistry.getRegistry(host, 1099);
+            Registry registry = LocateRegistry.getRegistry(null);
             service = (IBricoMerlinService) registry.lookup("BricoMerlinService");
 
             System.out.println("Connexion au serveur BricoMerlin réussie");

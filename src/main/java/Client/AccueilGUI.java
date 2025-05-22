@@ -58,7 +58,7 @@ public class AccueilGUI extends JFrame {
         JOptionPane.showMessageDialog(this,
                 "Lancement de l'interface d'administration...", "Info", JOptionPane.INFORMATION_MESSAGE);
         this.dispose();
-        MainApplicationV0 admin = new MainApplicationV0(host);
+        MainApplicationV0 admin = new MainApplicationV0();
         admin.setVisible(true);
     }
 

@@ -86,7 +86,7 @@ public class MainApplicationV0 extends JFrame {
     private JPanel prixUpdatePanel;
     private JButton validerPrixButton;
 
-    public MainApplicationV0(String host) {
+    public MainApplicationV0() {
         super("Brico-Merlin - Système de Gestion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -95,7 +95,7 @@ public class MainApplicationV0 extends JFrame {
         try {
             // Connexion au serveur RMI
 
-            Registry registry = LocateRegistry.getRegistry(host, 1099);
+            Registry registry = LocateRegistry.getRegistry(null);
             service = (IBricoMerlinService) registry.lookup("BricoMerlinService");
 
             initUI();
@@ -1217,13 +1217,7 @@ public class MainApplicationV0 extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            String host = "localhost";
-
-            if (args.length > 0) {
-                host = args[0];
-            }
-
-            MainApplicationV0 client = new MainApplicationV0(host);
+            MainApplicationV0 client = new MainApplicationV0();
             client.setVisible(true);
         });
     }

@@ -1,37 +1,30 @@
 package Serveur;
 
-import java.rmi.registry.LocateRegistry;
+import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 
-public class ServeurRMI {
-    private static final Logger LOGGER = Logger.getLogger(ServeurRMI.class.getName());
+public class ServeurRMI extends BricoMerlinServiceImpl {
 
-    public static void main(String[] args) {
+    public ServeurRMI() {}
+
+    public static void main(String args[]) {
         try {
+            // crée l'objet distant
+            BricoMerlinServiceImpl obj = new BricoMerlinServiceImpl();
 
+            // ici, nous exportons l'objet distant vers le stub
+            IBricoMerlinService stub = (IBricoMerlinService) UnicastRemoteObject.exportObject(obj, 0);
 
-            // Créer le service RMI
-            IBricoMerlinService service = new BricoMerlinServiceImpl();
+            // Liaison de l'objet distant (stub) dans le Registre
+            Registry reg = LocateRegistry.getRegistry();
 
-            // Créer ou récupérer le registre RMI
-            Registry registry;
-            try {
-                registry = LocateRegistry.createRegistry(1099);
-                LOGGER.info("Registry RMI créé sur le port 1099");
-            } catch (Exception e) {
-                LOGGER.info("Registry RMI déjà démarré, tentative de récupération...");
-                registry = LocateRegistry.getRegistry(1099);
-            }
-
-            // Enregistrer le service dans le registre
-            registry.rebind("BricoMerlinService", service);
-
-            LOGGER.info("Serveur BricoMerlin démarré avec succès");
-            LOGGER.info("Attente de connexions des clients...");
+            reg.rebind("BricoMerlinService", stub);
+            System.out.println("Le Serveur BricoMerlin est prêt...");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du démarrage du serveur", e);
+            System.err.println(e.toString());
+            e.printStackTrace();
         }
     }
 }

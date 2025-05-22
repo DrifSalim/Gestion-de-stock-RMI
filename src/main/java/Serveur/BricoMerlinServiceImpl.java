@@ -24,12 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BricoMerlinServiceImpl extends UnicastRemoteObject implements IBricoMerlinService {
+public class BricoMerlinServiceImpl implements IBricoMerlinService {
 
         private Connection connection;
 
-    public BricoMerlinServiceImpl() throws RemoteException {
-        super();
+    public BricoMerlinServiceImpl() {
         try {
             connection = DbConnection.getInstance().getConnection();
         } catch (Exception e) {
