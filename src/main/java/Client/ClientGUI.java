@@ -29,8 +29,8 @@ import com.itextpdf.layout.property.TextAlignment;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class AdminGUI extends JFrame {
-    private IBricoMerlinService service;
+public class ClientGUI extends JFrame {
+    private IBricoMerlinService stub;
     private int currentFactureId = 0;
     private boolean facturePayee = false;
 
@@ -44,8 +44,6 @@ public class AdminGUI extends JFrame {
     private JPanel recherchePanel;
     private JPanel panierPanel;
     private JPanel facturePanel;
-    private JPanel chiffreAffairesPanel;
-    private JPanel adminPanel;
 
     // Composants pour consulter le stock
     private JTextField refStockField;
@@ -71,19 +69,8 @@ public class AdminGUI extends JFrame {
     private JPanel paiementPanel;
     private JButton ajouterArticleFactureButton; // Nouveau bouton pour ajouter un article
 
-    // Composants pour le chiffre d'affaires
-    private JTextField dateCAField;
-    private JLabel chiffreAffairesLabel;
 
-    // Composants pour l'administration
-    private JTabbedPane adminTabbedPane;
-    private JPanel stockAdminPanel;
-    private JTextField refStockAdminField;
-    private JTextField qteStockAdminField;
-    private JTextArea stockAdminInfoArea;
-
-
-    public AdminGUI() {
+    public ClientGUI() {
         super("Brico-Merlin - Système de Gestion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -93,7 +80,7 @@ public class AdminGUI extends JFrame {
             // Connexion au serveur RMI
 
             Registry registry = LocateRegistry.getRegistry(null);
-            service = (IBricoMerlinService) registry.lookup("BricoMerlinService");
+            stub = (IBricoMerlinService) registry.lookup("BricoMerlinService");
 
             initUI();
         } catch (RemoteException | NotBoundException e) {
@@ -119,8 +106,6 @@ public class AdminGUI extends JFrame {
         createRecherchePanel();
         createPanierPanel();
         createFacturePanel();
-        createChiffreAffairesPanel();
-        createAdminPanel();
 
         // Ajout des panels au panel principal
         mainPanel.add(menuPanel, "menu");
@@ -128,8 +113,6 @@ public class AdminGUI extends JFrame {
         mainPanel.add(recherchePanel, "recherche");
         mainPanel.add(panierPanel, "panier");
         mainPanel.add(facturePanel, "facture");
-        mainPanel.add(chiffreAffairesPanel, "ca");
-        mainPanel.add(adminPanel, "admin");
 
         // Affichage du menu principal
         cardLayout.show(mainPanel, "menu");
@@ -157,8 +140,6 @@ public class AdminGUI extends JFrame {
         JButton nouveauPanierButton = createMenuButton("3. Créer un nouveau panier");
         JButton ajouterArticleButton = createMenuButton("4. Ajouter un article au panier");
         JButton factureButton = createMenuButton("5. Consulter et payer une facture");
-        JButton caButton = createMenuButton("6. Consulter le chiffre d'affaires");
-        JButton adminButton = createMenuButton("7. Gérer le stock (Administration)");
         JButton quitterButton = createMenuButton("8. Quitter");
 
         // Actions des boutons
@@ -181,8 +162,6 @@ public class AdminGUI extends JFrame {
             updatePaiementPanelVisibility();
             cardLayout.show(mainPanel, "facture");
         });
-        caButton.addActionListener(e -> cardLayout.show(mainPanel, "ca"));
-        adminButton.addActionListener(e -> cardLayout.show(mainPanel, "admin"));
         quitterButton.addActionListener(e -> System.exit(0));
 
         // Ajout des boutons au panel
@@ -191,8 +170,6 @@ public class AdminGUI extends JFrame {
         buttonsPanel.add(nouveauPanierButton);
         buttonsPanel.add(ajouterArticleButton);
         buttonsPanel.add(factureButton);
-        buttonsPanel.add(caButton);
-        buttonsPanel.add(adminButton);
         buttonsPanel.add(quitterButton);
 
         menuPanel.add(buttonsPanel, BorderLayout.CENTER);
@@ -260,7 +237,7 @@ public class AdminGUI extends JFrame {
     }
 
     private void afficherconsulterStock(long reference) throws RemoteException {
-        Article article = service.consulterStock(reference);
+        Article article = stub.consulterStock(reference);
 
         if (article != null) {
             StringBuilder sb = new StringBuilder();
@@ -329,7 +306,7 @@ public class AdminGUI extends JFrame {
     }
 
     private void rechercherArticlesParFamille(String nomFamille) throws RemoteException {
-        List<Article> articles = service.rechercherArticlesParFamille(nomFamille);
+        List<Article> articles = stub.rechercherArticlesParFamille(nomFamille);
 
         // Vider le tableau
         articlesModel.setRowCount(0);
@@ -445,7 +422,7 @@ public class AdminGUI extends JFrame {
                 }
 
                 long reference = Long.parseLong(refPanierField.getText());
-                Article article = service.consulterStock(reference);
+                Article article = stub.consulterStock(reference);
 
                 if (article != null) {
                     StringBuilder sb = new StringBuilder();
@@ -492,7 +469,7 @@ public class AdminGUI extends JFrame {
                 }
 
                 // Vérifier si l'article existe
-                Article article = service.consulterStock(reference);
+                Article article = stub.consulterStock(reference);
                 if (article == null) {
                     JOptionPane.showMessageDialog(this,
                             "Article non trouvé.",
@@ -507,7 +484,7 @@ public class AdminGUI extends JFrame {
                     return;
                 }
 
-                boolean success = service.acheterArticle(reference, quantite, currentFactureId);
+                boolean success = stub.acheterArticle(reference, quantite, currentFactureId);
 
                 if (success) {
                     JOptionPane.showMessageDialog(this,
@@ -535,7 +512,7 @@ public class AdminGUI extends JFrame {
     private void creerNouveauPanier() {
         try {
             // Appel de la méthode distante pour créer une nouvelle facture
-            this.currentFactureId = service.creerNouvelleFacture();
+            this.currentFactureId = stub.creerNouvelleFacture();
 
             panierIdLabel.setText("Panier actuel: " + currentFactureId);
             JOptionPane.showMessageDialog(this,
@@ -641,7 +618,7 @@ public class AdminGUI extends JFrame {
                 int idFacture = Integer.parseInt(factureIdField.getText());
 
                 // Vérifier si la facture existe
-                Facture facture = service.consulterFacture(idFacture);
+                Facture facture = stub.consulterFacture(idFacture);
                 if (facture == null) {
                     JOptionPane.showMessageDialog(this,
                             "Facture non trouvée.",
@@ -699,10 +676,10 @@ public class AdminGUI extends JFrame {
                         "Confirmation", JOptionPane.YES_NO_OPTION);
 
                 if (confirmation == JOptionPane.YES_OPTION) {
-                    boolean success = service.payerFacture(idFacture, modePaiement);
+                    boolean success = stub.payerFacture(idFacture, modePaiement);
 
                     if (success) {
-                        service.enregistrerFactureEnPDF(idFacture);
+                        stub.enregistrerFactureEnPDF(idFacture);
 
                         JOptionPane.showMessageDialog(this,
                                 "Paiement effectué avec succès.\nMerci de votre achat chez Brico-Merlin!",
@@ -729,7 +706,7 @@ public class AdminGUI extends JFrame {
     }
 
     private void consulterFacture(int idFacture) throws RemoteException {
-        Facture facture = service.consulterFacture(idFacture);
+        Facture facture = stub.consulterFacture(idFacture);
 
         if (facture == null) {
             factureInfoArea.setText("Facture non trouvée.");
@@ -799,224 +776,6 @@ public class AdminGUI extends JFrame {
         paiementPanel.repaint();
     }
 
-    private void createChiffreAffairesPanel() {
-        chiffreAffairesPanel = new JPanel(new BorderLayout());
-
-        // Titre
-        JLabel titleLabel = new JLabel("CONSULTATION DU CHIFFRE D'AFFAIRES", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0));
-        chiffreAffairesPanel.add(titleLabel, BorderLayout.NORTH);
-
-        // Panel pour la saisie
-        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel dateLabel = new JLabel("Date (JJ/MM/AAAA):");
-        dateCAField = new JTextField(10);
-        JButton consulterButton = new JButton("Consulter");
-
-        inputPanel.add(dateLabel);
-        inputPanel.add(dateCAField);
-        inputPanel.add(consulterButton);
-
-        // Panel pour l'affichage du résultat
-        JPanel resultPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel caLabelText = new JLabel("Chiffre d'affaires:");
-        chiffreAffairesLabel = new JLabel("0.00 €");
-        chiffreAffairesLabel.setFont(new Font("Arial", Font.BOLD, 18));
-
-        resultPanel.add(caLabelText);
-        resultPanel.add(chiffreAffairesLabel);
-
-        // Bouton retour
-        JButton retourButton = new JButton("Retour au menu principal");
-        retourButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
-
-        // Panel central
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBorder(new EmptyBorder(50, 20, 50, 20));
-        centerPanel.add(inputPanel, BorderLayout.NORTH);
-        centerPanel.add(resultPanel, BorderLayout.CENTER);
-        centerPanel.add(retourButton, BorderLayout.SOUTH);
-
-        chiffreAffairesPanel.add(centerPanel, BorderLayout.CENTER);
-
-        // Action du bouton consulter
-        consulterButton.addActionListener(e -> {
-            try {
-                String dateStr = dateCAField.getText();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                LocalDateTime date = LocalDateTime.parse(dateStr + " 00:00:00",
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-
-                double chiffreAffaire = service.calculerChiffreAffaire(date);
-                chiffreAffairesLabel.setText(String.format("%.2f €", chiffreAffaire));
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Format de date invalide ou erreur lors de la consultation.\n" +
-                                "Veuillez entrer une date au format JJ/MM/AAAA (exemple: 12/05/2024).",
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-    }
-
-    private void createAdminPanel() {
-        adminPanel = new JPanel(new BorderLayout());
-
-        // Titre
-        JLabel titleLabel = new JLabel("ADMINISTRATION", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0));
-        adminPanel.add(titleLabel, BorderLayout.NORTH);
-
-        // Création des onglets
-        adminTabbedPane = new JTabbedPane();
-
-        // Onglet gestion du stock
-        createStockAdminPanel();
-
-
-
-        // Ajout des onglets
-        adminTabbedPane.addTab("Gestion du stock", stockAdminPanel);
-
-        // Bouton retour
-        JButton retourButton = new JButton("Retour au menu principal");
-        retourButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
-
-        // Panel central
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
-        centerPanel.add(adminTabbedPane, BorderLayout.CENTER);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.add(retourButton);
-
-        adminPanel.add(centerPanel, BorderLayout.CENTER);
-        adminPanel.add(bottomPanel, BorderLayout.SOUTH);
-    }
-
-    private void createStockAdminPanel() {
-        stockAdminPanel = new JPanel(new BorderLayout());
-
-        // Panel pour la saisie
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        inputPanel.setBorder(new EmptyBorder(20, 50, 20, 50));
-
-        JLabel refLabel = new JLabel("Référence de l'article:");
-        refStockAdminField = new JTextField(10);
-        JLabel qteLabel = new JLabel("Quantité à ajouter:");
-        qteStockAdminField = new JTextField(10);
-
-        inputPanel.add(refLabel);
-        inputPanel.add(refStockAdminField);
-        inputPanel.add(qteLabel);
-        inputPanel.add(qteStockAdminField);
-
-        JButton infoButton = new JButton("Informations sur l'article");
-        JButton ajouterButton = new JButton("Ajouter au stock");
-
-        inputPanel.add(infoButton);
-        inputPanel.add(ajouterButton);
-
-        // Zone d'affichage des informations
-        stockAdminInfoArea = new JTextArea(10, 40);
-        stockAdminInfoArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(stockAdminInfoArea);
-
-        stockAdminPanel.add(inputPanel, BorderLayout.NORTH);
-        stockAdminPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Action du bouton info
-        infoButton.addActionListener(e -> {
-            try {
-                if (refStockAdminField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this,
-                            "Veuillez entrer une référence d'article.",
-                            "Erreur", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                long reference = Long.parseLong(refStockAdminField.getText());
-                Article article = service.consulterStock(reference);
-
-                if (article != null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Informations sur l'article:\n\n");
-                    sb.append("Référence: ").append(article.getReference()).append("\n");
-                    sb.append("Nom: ").append(article.getNom()).append("\n");
-                    sb.append("Famille: ").append(article.getFamille().getNom()).append("\n");
-                    sb.append("Prix unitaire: ").append(article.getPrix()).append(" €\n");
-                    sb.append("Quantité en stock: ").append(article.getQuantite_stock());
-
-                    stockAdminInfoArea.setText(sb.toString());
-                } else {
-                    stockAdminInfoArea.setText("Article non trouvé.");
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Veuillez entrer une référence valide (nombre entier).",
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            } catch (RemoteException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Erreur lors de la consultation: " + ex.getMessage(),
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // Action du bouton ajouter
-        ajouterButton.addActionListener(e -> {
-            try {
-                if (refStockAdminField.getText().isEmpty() || qteStockAdminField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(this,
-                            "Veuillez remplir tous les champs.",
-                            "Erreur", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                long reference = Long.parseLong(refStockAdminField.getText());
-                int quantite = Integer.parseInt(qteStockAdminField.getText());
-
-                if (quantite <= 0) {
-                    JOptionPane.showMessageDialog(this,
-                            "La quantité doit être supérieure à 0.",
-                            "Erreur", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                // Vérifier si l'article existe
-                Article article = service.consulterStock(reference);
-                if (article == null) {
-                    JOptionPane.showMessageDialog(this,
-                            "Article non trouvé.",
-                            "Erreur", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                service.ajouterStock(reference, quantite);
-
-                JOptionPane.showMessageDialog(this,
-                        "Stock mis à jour avec succès.",
-                        "Succès", JOptionPane.INFORMATION_MESSAGE);
-
-                // Afficher le nouveau stock
-                article = service.consulterStock(reference);
-                stockAdminInfoArea.setText("Stock mis à jour avec succès.\nNouveau stock: " + article.getQuantite_stock());
-
-                refStockAdminField.setText("");
-                qteStockAdminField.setText("");
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Veuillez entrer des valeurs numériques valides.",
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            } catch (RemoteException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Erreur lors de la mise à jour du stock: " + ex.getMessage(),
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-    }
-
-
 
     // Méthode utilitaire pour trouver un composant par son nom
     private Component findComponentByName(Container container, String name) {
@@ -1037,7 +796,7 @@ public class AdminGUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            AdminGUI client = new AdminGUI();
+            ClientGUI client = new ClientGUI();
             client.setVisible(true);
         });
     }

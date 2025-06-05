@@ -109,15 +109,33 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
     @Override
     public boolean acheterArticle(long reference, int quantite, int idFacture) throws RemoteException {
         try {
-            connection.setAutoCommit(false); //pour executer l'ensemble des requetes à la fois
+            connection.setAutoCommit(false); // Exécution atomique
+
+            // Vérifier que la facture n'est pas déjà payée
+            try (PreparedStatement psCheckFacture = connection.prepareStatement(
+                    "SELECT status FROM facture WHERE id_facture = ?")) {
+                psCheckFacture.setInt(1, idFacture);
+                ResultSet rsFacture = psCheckFacture.executeQuery();
+
+                if (rsFacture.next()) {
+                    String status = rsFacture.getString("status");
+                    if ("payee".equalsIgnoreCase(status)) {
+                        connection.rollback();
+                        throw new RemoteException("Facture déja payée, impossible d'ajouter un article");
+                    }
+                } else {
+                    connection.rollback();
+                    return false; // Facture inexistante
+                }
+            }
 
             // Vérifier et verrouiller le stock
             try (PreparedStatement psStock = connection.prepareStatement(
                     "SELECT quantite_stock FROM article WHERE reference = ? FOR UPDATE")) {
                 psStock.setLong(1, reference);
                 ResultSet rs = psStock.executeQuery();
-                if (rs.next() && rs.getInt("quantite_stock") >= quantite) {
 
+                if (rs.next() && rs.getInt("quantite_stock") >= quantite) {
                     // Mettre à jour le stock
                     try (PreparedStatement psUpdate = connection.prepareStatement(
                             "UPDATE article SET quantite_stock = quantite_stock - ? WHERE reference = ?")) {
@@ -126,16 +144,38 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
                         psUpdate.executeUpdate();
                     }
 
-                    // Ajouter la ligne de facture
-                    Article article = consulterStock(reference);
-                    try (PreparedStatement psLigne = connection.prepareStatement(
-                            "INSERT INTO ligne_facture VALUES (?, ?, ?, ?)")) {
-                        psLigne.setInt(1, idFacture);
-                        psLigne.setLong(2, reference);
-                        psLigne.setInt(3, quantite);
-                        psLigne.setDouble(4, article.getPrix());
-                        psLigne.executeUpdate();
+                    // Vérifier si l'article existe déjà dans la facture
+                    try (PreparedStatement psCheck = connection.prepareStatement(
+                            "SELECT quantite FROM ligne_facture WHERE id_facture = ? AND reference = ?")) {
+                        psCheck.setInt(1, idFacture);
+                        psCheck.setLong(2, reference);
+                        ResultSet rsCheck = psCheck.executeQuery();
+
+                        if (rsCheck.next()) {
+                            // Mettre à jour la quantité
+                            int ancienneQuantite = rsCheck.getInt("quantite");
+                            try (PreparedStatement psUpdateLigne = connection.prepareStatement(
+                                    "UPDATE ligne_facture SET quantite = ? WHERE id_facture = ? AND reference = ?")) {
+                                psUpdateLigne.setInt(1, ancienneQuantite + quantite);
+                                psUpdateLigne.setInt(2, idFacture);
+                                psUpdateLigne.setLong(3, reference);
+                                psUpdateLigne.executeUpdate();
+                            }
+                        } else {
+                            // Insérer une nouvelle ligne
+                            Article article = consulterStock(reference);
+                            try (PreparedStatement psInsert = connection.prepareStatement(
+                                    "INSERT INTO ligne_facture (id_facture, reference, quantite, prix) VALUES (?, ?, ?, ?)")) {
+                                psInsert.setInt(1, idFacture);
+                                psInsert.setLong(2, reference);
+                                psInsert.setInt(3, quantite);
+                                psInsert.setDouble(4, article.getPrix());
+                                psInsert.executeUpdate();
+                            }
+                        }
                     }
+
+                    // Mise à jour du montant total
                     updateMontantFacture(idFacture);
                     connection.commit();
                     return true;
@@ -151,6 +191,8 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
             try { connection.setAutoCommit(true); } catch (SQLException ignored) {}
         }
     }
+
+
 
     //payer une facture
     @Override

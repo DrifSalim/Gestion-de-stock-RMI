@@ -1,5 +1,7 @@
 package Serveur;
 
+import Serveur.Central.ICentralBricoMerlinService;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -22,6 +24,12 @@ public class ServeurRMI extends BricoMerlinServiceImpl {
 
             reg.rebind("BricoMerlinService", stub);
             System.out.println("Le Serveur BricoMerlin est prêt...");
+
+            Registry registry = LocateRegistry.getRegistry(null);
+            ICentralBricoMerlinService stub_central = (ICentralBricoMerlinService) registry.lookup("CentralBricoMerlinService");
+
+            System.out.println("Connexion au serveur BricoMerlin réussie");
+
         } catch (Exception e) {
             System.err.println(e.toString());
             e.printStackTrace();

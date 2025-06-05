@@ -7,12 +7,10 @@ import java.awt.event.ActionListener;
 
 public class AccueilGUI extends JFrame {
 
-    private String host;
 
 
-    public AccueilGUI(String host) {
+    public AccueilGUI() {
         super("Brico-Merlin - Accueil");
-        this.host = host;
         initUI();
     }
 
@@ -56,28 +54,24 @@ public class AccueilGUI extends JFrame {
 
     private void launchAdminInterface() {
         JOptionPane.showMessageDialog(this,
-                "Lancement de l'interface d'administration...", "Info", JOptionPane.INFORMATION_MESSAGE);
+                "Lancement de l'interface d'Administration...", "Info", JOptionPane.INFORMATION_MESSAGE);
         this.dispose();
-        MainApplicationV0 admin = new MainApplicationV0();
+        AdminGUI admin = new AdminGUI();
         admin.setVisible(true);
     }
 
 
     private void launchClientInterface() {
         JOptionPane.showMessageDialog(this,
-                "Lancement de l'interface client...", "Info", JOptionPane.INFORMATION_MESSAGE);
+                "Lancement de l'interface Employée...", "Info", JOptionPane.INFORMATION_MESSAGE);
         this.dispose();
-        MainApplication client = new MainApplication(host);
+        ClientGUI client = new ClientGUI();
         client.setVisible(true);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            String host = "localhost";
-            if (args.length > 0) {
-                host = args[0];
-            }
-            AccueilGUI gui = new AccueilGUI(host);
+            AccueilGUI gui = new AccueilGUI();
             gui.setVisible(true);
         });
     }

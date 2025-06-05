@@ -11,6 +11,10 @@ public class Article implements Serializable {
     private Famille famille;
 
     public Article() {}
+    public Article(long reference, double prix) {
+        this.reference = reference;
+        this.prix = prix;
+    }
     public Article(long reference, String nom, double prix, int quantite_stock, Famille famille) {
         if(prix <= 0) throw new IllegalArgumentException("Prix invalide");
         if(quantite_stock < 0) throw new IllegalArgumentException("Stock invalide");
