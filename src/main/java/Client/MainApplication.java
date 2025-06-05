@@ -2071,7 +2071,7 @@ public class MainApplication extends JFrame {
                     return;
                 }
 
-                service.mettreAJourPrix(nouveauxPrix);
+                //service.mettreAJourPrix(nouveauxPrix);
 
                 // Show success dialog
                 JOptionPane.showMessageDialog(this,
@@ -2088,9 +2088,9 @@ public class MainApplication extends JFrame {
                 prixUpdatePanel.repaint();
             } catch (NumberFormatException ex) {
                 showErrorDialog("Erreur", "Veuillez entrer des valeurs numériques valides.");
-            } catch (RemoteException ex) {
+            } /*catch (RemoteException ex) {
                 showErrorDialog("Erreur", "Erreur lors de la mise à jour des prix: " + ex.getMessage());
-            }
+            }*/
         });
     }
 

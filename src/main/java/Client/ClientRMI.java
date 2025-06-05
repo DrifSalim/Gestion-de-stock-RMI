@@ -416,7 +416,7 @@ public class ClientRMI {
             }
 
             if (!nouveauxPrix.isEmpty()) {
-                service.mettreAJourPrix(nouveauxPrix);
+                //service.mettreAJourPrix(nouveauxPrix);
                 System.out.println("Prix mis à jour avec succès.");
             } else {
                 System.out.println("Aucun prix n'a été mis à jour.");

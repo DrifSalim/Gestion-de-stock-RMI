@@ -320,35 +320,7 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
         }
     }
 
-    // Mise à jour des prix en masse (transactionnelle)
-    @Override
-    public void mettreAJourPrix(Map<Long, Double> nouveauxPrix) throws RemoteException {
-        try {
-            connection.setAutoCommit(false); // Désactiver l'autocommit
-            String sql = "UPDATE article SET prix = ? WHERE reference = ?";
 
-            for (Map.Entry<Long, Double> entry : nouveauxPrix.entrySet()) {
-                try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                    ps.setDouble(1, entry.getValue());
-                    ps.setLong(2, entry.getKey());
-                    ps.executeUpdate();
-                }
-            }
-
-            connection.commit(); // Valider toutes les mises à jour
-        } catch (SQLException e) {
-            try {
-                connection.rollback(); // Annuler en cas d'erreur
-            } catch (SQLException ignored) {
-            }
-            throw new RemoteException("Erreur lors de la mise à jour des prix", e);
-        } finally {
-            try {
-                connection.setAutoCommit(true); // Réactiver l'autocommit
-            } catch (SQLException ignored) {
-            }
-        }
-    }
 
     @Override
     public int creerNouvelleFacture() throws RemoteException {
@@ -459,6 +431,22 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
             throw new RemoteException("Erreur lors de la génération du PDF", e);
         }
     }
+    @Override
+    public boolean mettreAJourPrixLocal(long reference, double nouveauPrix) {
+        String sql = "UPDATE article SET prix = ?" +
+                "WHERE reference = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDouble(1, nouveauPrix);
+            ps.setLong(2, reference);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 
 
 }

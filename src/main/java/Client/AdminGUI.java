@@ -3,6 +3,8 @@ package Client;
 import Model.Article;
 import Model.Facture;
 import Model.Ligne_Facture;
+import Serveur.Central.CentralBricoMerlinServiceImpl;
+import Serveur.Central.ICentralBricoMerlinService;
 import Serveur.IBricoMerlinService;
 
 import javax.swing.*;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Serveur.ServeurRMI;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.*;
 import com.itextpdf.layout.element.*;
@@ -874,8 +877,6 @@ public class AdminGUI extends JFrame {
         // Onglet gestion du stock
         createStockAdminPanel();
 
-
-
         // Ajout des onglets
         adminTabbedPane.addTab("Gestion du stock", stockAdminPanel);
 
@@ -899,7 +900,7 @@ public class AdminGUI extends JFrame {
         stockAdminPanel = new JPanel(new BorderLayout());
 
         // Panel pour la saisie
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));
         inputPanel.setBorder(new EmptyBorder(20, 50, 20, 50));
 
         JLabel refLabel = new JLabel("Référence de l'article:");
@@ -914,16 +915,26 @@ public class AdminGUI extends JFrame {
 
         JButton infoButton = new JButton("Informations sur l'article");
         JButton ajouterButton = new JButton("Ajouter au stock");
+        JButton mettreAJourPrixButton = new JButton("Mettre à jour prix");
 
         inputPanel.add(infoButton);
         inputPanel.add(ajouterButton);
+
+        // Panel pour le bouton de mise à jour du prix
+        JPanel prixButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        prixButtonPanel.add(mettreAJourPrixButton);
 
         // Zone d'affichage des informations
         stockAdminInfoArea = new JTextArea(10, 40);
         stockAdminInfoArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(stockAdminInfoArea);
 
-        stockAdminPanel.add(inputPanel, BorderLayout.NORTH);
+        // Panel principal pour organiser les éléments
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(inputPanel, BorderLayout.CENTER);
+        topPanel.add(prixButtonPanel, BorderLayout.SOUTH);
+
+        stockAdminPanel.add(topPanel, BorderLayout.NORTH);
         stockAdminPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Action du bouton info
@@ -1011,6 +1022,35 @@ public class AdminGUI extends JFrame {
             } catch (RemoteException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Erreur lors de la mise à jour du stock: " + ex.getMessage(),
+                        "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Action du bouton mettre à jour prix
+        mettreAJourPrixButton.addActionListener(e -> {
+            try {
+                ServeurRMI serveur_local= new ServeurRMI();
+
+                List<Article> articles = serveur_local.recupererMiseAjourPrix();
+                System.out.println("articles: " + articles);
+                for (Article article : articles) {
+                    service.mettreAJourPrixLocal(article.getReference(), article.getPrix());
+                    System.out.println("article: " + article);
+                }
+
+
+
+                JOptionPane.showMessageDialog(this,
+                        "Prix mis à jour avec succès.",
+                        "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Veuillez entrer des valeurs numériques valides.",
+                        "Erreur", JOptionPane.ERROR_MESSAGE);
+            } catch (RemoteException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Erreur lors de la mise à jour du prix: " + ex.getMessage(),
                         "Erreur", JOptionPane.ERROR_MESSAGE);
             }
         });

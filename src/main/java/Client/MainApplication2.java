@@ -1815,7 +1815,7 @@ public class MainApplication2 extends JFrame {
                     return;
                 }
 
-                service.mettreAJourPrix(nouveauxPrix);
+                //service.mettreAJourPrix(nouveauxPrix);
 
                 // Afficher un message de confirmation avec animation
                 JDialog dialog = new JDialog(this, "Prix Mis à Jour", true);
@@ -1880,9 +1880,9 @@ public class MainApplication2 extends JFrame {
                 prixUpdatePanel.repaint();
             } catch (NumberFormatException ex) {
                 showCustomDialog("Veuillez entrer des valeurs numériques valides.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            } catch (RemoteException ex) {
+            } /*catch (RemoteException ex) {
                 showCustomDialog("Erreur lors de la mise à jour des prix: " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
+            }*/
         });
     }
 

@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService {
 
@@ -43,6 +45,26 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
             throw new RemoteException("Erreur lors de la mise à jour du prix", e);
         }
     }
+
+    @Override
+    public List<Article> getPrixMisAJour() throws RemoteException{
+        String sql = "SELECT * FROM prix_articles";
+        try (PreparedStatement ps = connection.prepareStatement(sql)){
+            ResultSet rs = ps.executeQuery();
+            List<Article> articles = new ArrayList<>();
+            while (rs.next()){
+                Article article = new Article(rs.getLong("reference"), rs.getDouble("prix"));
+                articles.add(article);
+            }
+            return articles;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+
     @Override
     public boolean stockerFacturePDF(byte[] contenuPDF, String nomFichier) throws RemoteException {
         if (contenuPDF == null || contenuPDF.length == 0) {

@@ -25,5 +25,5 @@ public interface IBricoMerlinService extends Remote {
 
         // Opérations administratives
         void ajouterStock(long reference, int quantite) throws RemoteException;
-        void mettreAJourPrix(Map<Long, Double> nouveauxPrix) throws RemoteException;
+        boolean mettreAJourPrixLocal(long reference, double nouveauPrix) throws RemoteException;
 }
