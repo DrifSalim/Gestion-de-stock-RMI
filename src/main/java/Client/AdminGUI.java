@@ -3,16 +3,12 @@ package Client;
 import Model.Article;
 import Model.Facture;
 import Model.Ligne_Facture;
-import Serveur.Central.CentralBricoMerlinServiceImpl;
-import Serveur.Central.ICentralBricoMerlinService;
 import Serveur.IBricoMerlinService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -20,17 +16,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import Serveur.ServeurRMI;
-import com.itextpdf.kernel.pdf.*;
-import com.itextpdf.layout.*;
-import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.TextAlignment;
-import java.io.File;
-import java.io.FileNotFoundException;
+import Serveur.ServeurLocalRMI;
 
 public class AdminGUI extends JFrame {
     private IBricoMerlinService service;
@@ -915,13 +903,13 @@ public class AdminGUI extends JFrame {
 
         JButton infoButton = new JButton("Informations sur l'article");
         JButton ajouterButton = new JButton("Ajouter au stock");
-        JButton mettreAJourPrixButton = new JButton("Mettre à jour prix");
+        JButton mettreAJourPrixButton = new JButton("Mettre à jour les prix");
 
         inputPanel.add(infoButton);
         inputPanel.add(ajouterButton);
 
         // Panel pour le bouton de mise à jour du prix
-        JPanel prixButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel prixButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         prixButtonPanel.add(mettreAJourPrixButton);
 
         // Zone d'affichage des informations
@@ -1029,7 +1017,7 @@ public class AdminGUI extends JFrame {
         // Action du bouton mettre à jour prix
         mettreAJourPrixButton.addActionListener(e -> {
             try {
-                ServeurRMI serveur_local= new ServeurRMI();
+                ServeurLocalRMI serveur_local= new ServeurLocalRMI();
                 List<Article> articles = serveur_local.recupererMiseAjourPrix();
                 System.out.println("articles: " + articles);
                 for (Article article : articles) {

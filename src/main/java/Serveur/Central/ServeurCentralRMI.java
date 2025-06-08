@@ -2,14 +2,13 @@ package Serveur.Central;
 
 
 
-import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class CentralServeurRMI extends CentralBricoMerlinServiceImpl {
+public class ServeurCentralRMI extends CentralBricoMerlinServiceImpl {
 
-    public CentralServeurRMI() {}
+    public ServeurCentralRMI() {}
 
     public static void main(String args[]) {
         try {

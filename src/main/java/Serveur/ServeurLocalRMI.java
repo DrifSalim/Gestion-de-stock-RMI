@@ -3,17 +3,15 @@ package Serveur;
 import Model.Article;
 import Serveur.Central.ICentralBricoMerlinService;
 
-import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServeurRMI extends BricoMerlinServiceImpl {
+public class ServeurLocalRMI extends BricoMerlinServiceImpl {
     private ICentralBricoMerlinService stub_central;
 
-    public ServeurRMI() {
+    public ServeurLocalRMI() {
         try {
             // Récupérer le stub du serveur central à la création de l'instance
             Registry registry = LocateRegistry.getRegistry(null);
@@ -24,6 +22,7 @@ public class ServeurRMI extends BricoMerlinServiceImpl {
             e.printStackTrace();
         }
     }
+    //appel de la fonction de mise à jour de prix
     public List<Article> recupererMiseAjourPrix() {
         List<Article> articles= new ArrayList<>();
         try {

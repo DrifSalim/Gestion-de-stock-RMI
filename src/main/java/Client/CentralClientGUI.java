@@ -100,7 +100,7 @@ public class CentralClientGUI extends JFrame {
         JTextField prixField = new JTextField(10);
         prixField.setName("prix_" + index);
 
-        JButton checkButton = new JButton("Vérifier");
+        JButton checkButton = new JButton("Informations");
         checkButton.addActionListener(e -> {
             try {
                 if (refField.getText().isEmpty()) {
