@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -367,10 +368,12 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
 
         // Créer le nom de fichier unique
         String nomFichier = "Facture-" + idFacture + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
-        String cheminFichier = "tickets-de-caisse/" + nomFichier;
+        LocalDate date = LocalDate.now();
+        String doss = "tickets-de-caisse/" + date+"/";
+        String cheminFichier = doss+ nomFichier;
 
         // Créer le dossier s'il n'existe pas
-        File dossier = new File("tickets-de-caisse");
+        File dossier = new File(doss);
         if (!dossier.exists()) {
             dossier.mkdir();
         }

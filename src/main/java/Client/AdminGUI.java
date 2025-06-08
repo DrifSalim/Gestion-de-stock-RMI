@@ -1030,7 +1030,6 @@ public class AdminGUI extends JFrame {
         mettreAJourPrixButton.addActionListener(e -> {
             try {
                 ServeurRMI serveur_local= new ServeurRMI();
-
                 List<Article> articles = serveur_local.recupererMiseAjourPrix();
                 System.out.println("articles: " + articles);
                 for (Article article : articles) {

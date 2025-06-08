@@ -23,7 +23,8 @@ public class ServeurRMI extends BricoMerlinServiceImpl {
             System.err.println("Erreur lors de la connexion au serveur central : " + e);
             e.printStackTrace();
         }
-    }    public List<Article> recupererMiseAjourPrix() {
+    }
+    public List<Article> recupererMiseAjourPrix() {
         List<Article> articles= new ArrayList<>();
         try {
             if (stub_central != null) {
@@ -44,10 +45,6 @@ public class ServeurRMI extends BricoMerlinServiceImpl {
             Registry reg = LocateRegistry.getRegistry();
             reg.rebind("BricoMerlinService", stub);
             System.out.println("Le Serveur BricoMerlin est prêt...");
-
-            // Exemple d’utilisation de la méthode
-            ServeurRMI serveur = new ServeurRMI();
-
         } catch (Exception e) {
             System.err.println(e.toString());
             e.printStackTrace();
