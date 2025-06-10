@@ -1043,8 +1043,6 @@ public class AdminGUI extends JFrame {
         });
     }
 
-
-
     // Méthode utilitaire pour trouver un composant par son nom
     private Component findComponentByName(Container container, String name) {
         for (Component component : container.getComponents()) {

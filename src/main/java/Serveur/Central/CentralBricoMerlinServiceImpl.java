@@ -48,7 +48,7 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
 
     @Override
     public List<Article> getPrixMisAJour() throws RemoteException{
-        String sql = "SELECT * FROM prix_articles";
+        String sql = "SELECT * FROM prix_articles where DATE(date_mise_a_jour) = CURDATE()";
         try (PreparedStatement ps = connection.prepareStatement(sql)){
             ResultSet rs = ps.executeQuery();
             List<Article> articles = new ArrayList<>();

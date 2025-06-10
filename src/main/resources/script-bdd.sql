@@ -37,8 +37,8 @@ CREATE TABLE ligne_facture (
                                FOREIGN KEY (id_facture) REFERENCES facture(id_facture),
                                FOREIGN KEY (reference) REFERENCES article(reference)
 );
+
 -- Insertion de données de test
--- Quelques familles d'articles
 INSERT INTO Famille (nom) VALUES
                               ('Outillage'),
                               ('Plomberie'),
@@ -46,7 +46,7 @@ INSERT INTO Famille (nom) VALUES
                               ('Jardin'),
                               ('Quincaillerie');
 
--- Quelques articles
+
 INSERT INTO Article (reference, nom, id_famille, prix, quantite_stock) VALUES
                                                                            (1001, 'Marteau de charpentier', 1, 15.99, 50),
                                                                            (1002, 'Tournevis cruciforme', 1, 8.50, 100),
