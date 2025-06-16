@@ -79,14 +79,14 @@ public class AccueilGUI extends JFrame {
         JOptionPane.showMessageDialog(this,
                 "Ouverture de l'interface Employée...", "Information", JOptionPane.INFORMATION_MESSAGE);
         dispose();
-        new ClientGUI().setVisible(true);
+        new EmployeeGUI().setVisible(true);
     }
 
     private void openCentralInterface() {
         JOptionPane.showMessageDialog(this,
                 "Ouverture du Serveur Central...", "Information", JOptionPane.INFORMATION_MESSAGE);
         dispose();
-        new CentralClientGUI().setVisible(true);
+        new SiegeCentralGUI().setVisible(true);
     }
 
     public static void main(String[] args) {

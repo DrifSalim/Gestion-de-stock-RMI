@@ -449,7 +449,4 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
         }
     }
 
-
-
-
 }

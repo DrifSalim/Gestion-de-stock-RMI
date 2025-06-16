@@ -10,16 +10,14 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.HashMap;
-import java.util.Map;
 
-public class CentralClientGUI extends JFrame {
+public class SiegeCentralGUI extends JFrame {
     private JPanel prixAdminPanel;
     private JPanel prixUpdatePanel;
     private JButton validerPrixButton;
     private ICentralBricoMerlinService stub;
 
-    public CentralClientGUI() {
+    public SiegeCentralGUI() {
         super("Brico-Merlin - Système de Gestion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -204,7 +202,7 @@ public class CentralClientGUI extends JFrame {
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            CentralClientGUI client = new CentralClientGUI();
+            SiegeCentralGUI client = new SiegeCentralGUI();
             client.setVisible(true);
         });
     }

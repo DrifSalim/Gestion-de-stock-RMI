@@ -9,27 +9,15 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.itextpdf.kernel.pdf.*;
-import com.itextpdf.layout.*;
-import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.TextAlignment;
-import java.io.File;
-import java.io.FileNotFoundException;
-
-public class ClientGUI extends JFrame {
+public class EmployeeGUI extends JFrame {
     private IBricoMerlinService stub;
     private int currentFactureId = 0;
     private boolean facturePayee = false;
@@ -70,7 +58,7 @@ public class ClientGUI extends JFrame {
     private JButton ajouterArticleFactureButton; // Nouveau bouton pour ajouter un article
 
 
-    public ClientGUI() {
+    public EmployeeGUI() {
         super("Brico-Merlin - Système de Gestion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -796,7 +784,7 @@ public class ClientGUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            ClientGUI client = new ClientGUI();
+            EmployeeGUI client = new EmployeeGUI();
             client.setVisible(true);
         });
     }
