@@ -10,6 +10,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -41,7 +42,7 @@ public class AdminGUI extends JFrame {
     // Composants pour consulter le stock
     private JTextField refStockField;
     private JTextArea stockInfoArea;
-
+    private JTextArea infoConnexionArea;
     // Composants pour rechercher des articles
     private JTextField familleField;
     private JTable articlesTable;
@@ -69,6 +70,7 @@ public class AdminGUI extends JFrame {
     // Composants pour l'administration
     private JTabbedPane adminTabbedPane;
     private JPanel stockAdminPanel;
+    private JPanel connexionPanel;
     private JTextField refStockAdminField;
     private JTextField qteStockAdminField;
     private JTextArea stockAdminInfoArea;
@@ -864,14 +866,18 @@ public class AdminGUI extends JFrame {
 
         // Onglet gestion du stock
         createStockAdminPanel();
+        createConnexionServeurCentralPanel();
 
         // Ajout des onglets
         adminTabbedPane.addTab("Gestion du stock", stockAdminPanel);
+        adminTabbedPane.addTab("Connexion au serveur central", connexionPanel);
 
         // Bouton retour
         JButton retourButton = new JButton("Retour au menu principal");
-        retourButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
-
+        retourButton.addActionListener(e -> {
+                    infoConnexionArea.setText("");
+                    cardLayout.show(mainPanel, "menu");
+                });
         // Panel central
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -903,14 +909,12 @@ public class AdminGUI extends JFrame {
 
         JButton infoButton = new JButton("Informations sur l'article");
         JButton ajouterButton = new JButton("Ajouter au stock");
-        JButton mettreAJourPrixButton = new JButton("Mettre à jour les prix");
 
         inputPanel.add(infoButton);
         inputPanel.add(ajouterButton);
 
         // Panel pour le bouton de mise à jour du prix
         JPanel prixButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        prixButtonPanel.add(mettreAJourPrixButton);
 
         // Zone d'affichage des informations
         stockAdminInfoArea = new JTextArea(10, 40);
@@ -1013,37 +1017,85 @@ public class AdminGUI extends JFrame {
                         "Erreur", JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
+    private void createConnexionServeurCentralPanel() {
+        connexionPanel = new JPanel(new BorderLayout());
 
-        // Action du bouton mettre à jour prix
-        mettreAJourPrixButton.addActionListener(e -> {
+        infoConnexionArea = new JTextArea(10, 40);
+        infoConnexionArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(infoConnexionArea);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        buttonPanel.setBorder(new EmptyBorder(30, 100, 30, 100));
+
+        JButton recupererMajButton = new JButton("Récupérer les mises à jour d'aujourd'hui");
+        JButton envoyerFacturesButton = new JButton("Envoyer les factures d'aujourd'hui");
+
+        buttonPanel.add(recupererMajButton);
+        buttonPanel.add(envoyerFacturesButton);
+
+        connexionPanel.add(buttonPanel, BorderLayout.NORTH);
+        connexionPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // récupérer les mises à jour
+        recupererMajButton.addActionListener(e -> {
             try {
-                ServeurLocalRMI serveur_local= new ServeurLocalRMI();
-                List<Article> articles = serveur_local.recupererMiseAjourPrix();
-                System.out.println("articles: " + articles);
-                for (Article article : articles) {
-                    service.mettreAJourPrixLocal(article.getReference(), article.getPrix());
-                    System.out.println("article: " + article);
+                ServeurLocalRMI serveurLocal = new ServeurLocalRMI();
+                List<Article> articles = serveurLocal.recupererMiseAjourPrix();
+                if (articles.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Aucune mise à jour de prix pour aujourd'hui.",
+                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return;
                 }
 
-
-
+                StringBuilder sb = new StringBuilder();
+                for (Article a : articles) {
+                    service.mettreAJourPrixLocal(a.getReference(), a.getPrix());
+                    sb.append("Réf ").append(a.getReference()).append(" => ").append(a.getPrix()).append(" €\n");
+                }
                 JOptionPane.showMessageDialog(this,
                         "Prix mis à jour avec succès.",
                         "Succès", JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (NumberFormatException ex) {
+                infoConnexionArea.setText("Mises à jour de prix effectuées aujourd'hui :\n\n" + sb);
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                        "Veuillez entrer des valeurs numériques valides.",
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
-            } catch (RemoteException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Erreur lors de la mise à jour du prix: " + ex.getMessage(),
-                        "Erreur", JOptionPane.ERROR_MESSAGE);
+                        "Erreur "+ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                infoConnexionArea.setText("Erreur : " + ex.getMessage());
+                ex.printStackTrace();
             }
         });
+
+        // Action : envoyer les factures
+        envoyerFacturesButton.addActionListener(e -> {
+            try {
+                ServeurLocalRMI serveurLocal = new ServeurLocalRMI();
+                List<File> factures = service.envoyerFacturesPDFDuJour();
+
+                if (factures.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Aucune facture à envoyer pour aujourd'hui.",
+                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                    infoConnexionArea.setText("Aucune facture PDF à envoyer.");
+                    return;
+                }
+
+                serveurLocal.envoyerPDF(factures);
+                JOptionPane.showMessageDialog(this,
+                        "Factures envoyées avec succès.",
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
+                infoConnexionArea.setText(factures.size() + " facture(s) envoyée(s) avec succès.");
+            } catch (Exception ex) {
+                infoConnexionArea.setText("Erreur lors de l'envoi des factures : " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
+
     }
 
-    // Méthode utilitaire pour trouver un composant par son nom
+
+    // Méthode pour trouver un composant par son nom
     private Component findComponentByName(Container container, String name) {
         for (Component component : container.getComponents()) {
             if (name.equals(component.getName())) {

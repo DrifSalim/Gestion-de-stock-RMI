@@ -15,6 +15,8 @@ import com.itextpdf.layout.property.UnitValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
@@ -448,5 +450,27 @@ public class BricoMerlinServiceImpl implements IBricoMerlinService {
             return false;
         }
     }
+
+    public List<File> envoyerFacturesPDFDuJour() throws RemoteException {
+        List<File> fichiersPDF = new ArrayList<>();
+        LocalDate aujourdHui = LocalDate.now();
+        String dossierFactures = "tickets-de-caisse/" + aujourdHui + "/";
+
+        File dossier = new File(dossierFactures);
+        if (!dossier.exists() || !dossier.isDirectory()) {
+            System.err.println("Dossier introuvable : " + dossierFactures);
+            return fichiersPDF;
+        }
+
+        File[] fichiers = dossier.listFiles((dir, name) -> name.toLowerCase().endsWith(".pdf"));
+        if (fichiers == null || fichiers.length == 0) {
+            System.out.println("Aucune facture PDF trouvée pour aujourd'hui.");
+            return fichiersPDF;
+        }
+
+        fichiersPDF.addAll(List.of(fichiers));
+        return fichiersPDF;
+    }
+
 
 }

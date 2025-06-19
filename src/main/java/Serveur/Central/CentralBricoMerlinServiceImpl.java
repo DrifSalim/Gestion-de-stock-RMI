@@ -7,11 +7,13 @@ import Serveur.DbConnection;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +49,10 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
     }
 
     @Override
-    public List<Article> getPrixMisAJour() throws RemoteException{
+    public List<Article> getPrixMisAJour() throws RemoteException{ //Récupere les mises à jours d'aujourd'hui
         String sql = "SELECT * FROM prix_articles where DATE(date_mise_a_jour) = CURDATE()";
+        //CURDATE() Parceque les mises a jour sont sensés être récupérés chaque matin
+        //Donc on récupere juste les mises à jour effectués aujourd'hui
         try (PreparedStatement ps = connection.prepareStatement(sql)){
             ResultSet rs = ps.executeQuery();
             List<Article> articles = new ArrayList<>();
@@ -62,9 +66,6 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
         }
     }
 
-
-
-
     @Override
     public boolean stockerFacturePDF(byte[] contenuPDF, String nomFichier) throws RemoteException {
         if (contenuPDF == null || contenuPDF.length == 0) {
@@ -73,7 +74,8 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
         }
 
         // Créer le répertoire de stockage s'il n'existe pas
-        String cheminBase = "archives/factures_magasins_pdf/";
+        LocalDate aujourdHui = LocalDate.now();
+        String cheminBase = "archives/factures_magasin_pdf/"+aujourdHui+"/";
         File repertoire = new File(cheminBase);
         if (!repertoire.exists()) {
             if (!repertoire.mkdirs()) {
@@ -118,6 +120,4 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
             throw new RemoteException("Erreur SQL", e);
         }
     }
-
-
 }

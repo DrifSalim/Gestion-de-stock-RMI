@@ -3,6 +3,7 @@ package Serveur;
 import Model.Article;
 import Model.Facture;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
@@ -26,4 +27,5 @@ public interface IBricoMerlinService extends Remote {
         // Opérations administratives
         void ajouterStock(long reference, int quantite) throws RemoteException;
         boolean mettreAJourPrixLocal(long reference, double nouveauPrix) throws RemoteException;
+        List<File> envoyerFacturesPDFDuJour() throws RemoteException;
 }

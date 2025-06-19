@@ -3,6 +3,9 @@ package Serveur;
 import Model.Article;
 import Serveur.Central.ICentralBricoMerlinService;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
@@ -37,6 +40,23 @@ public class ServeurLocalRMI extends BricoMerlinServiceImpl {
         }
         return articles;
     }
+
+    public void envoyerPDF(List <File> factures) throws IOException {
+        if (stub_central != null) {
+            for (File f : factures) {
+                byte[] contenu = Files.readAllBytes(f.toPath());
+                try{
+                    stub_central.stockerFacturePDF(contenu, f.getName());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            System.err.println("Stub central non initialisé.");
+        }
+    }
+
+
     public static void main(String args[]) {
         try {
             BricoMerlinServiceImpl obj = new BricoMerlinServiceImpl();
