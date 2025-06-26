@@ -30,23 +30,33 @@ public class CentralBricoMerlinServiceImpl implements ICentralBricoMerlinService
     }
     @Override
     public boolean mettreAJourPrix(long reference, double nouveauPrix) throws RemoteException {
-        String sql = "UPDATE prix_articles SET prix = ?, date_mise_a_jour = CURRENT_TIMESTAMP WHERE reference = ?";
+        String checkSql = "SELECT COUNT(*) FROM prix_articles WHERE reference = ?";
+        String updateSql = "UPDATE prix_articles SET prix = ?, date_mise_a_jour = CURRENT_TIMESTAMP WHERE reference = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setDouble(1, nouveauPrix);
-            ps.setLong(2, reference);
-
-            int rowsUpdated = ps.executeUpdate();
-
-            if (rowsUpdated > 0) {
-                return true;
-            } else {
-                return false;
+        try (
+                PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+                PreparedStatement updateStmt = connection.prepareStatement(updateSql)
+        ) {
+            // Vérifier l'existence de l'article
+            checkStmt.setLong(1, reference);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) == 0) {
+                    throw new RemoteException("Aucun article trouvé avec la référence : " + reference);
+                }
             }
+
+            // Mise à jour
+            updateStmt.setDouble(1, nouveauPrix);
+            updateStmt.setLong(2, reference);
+
+            int rowsUpdated = updateStmt.executeUpdate();
+            return rowsUpdated > 0;
+
         } catch (SQLException e) {
             throw new RemoteException("Erreur lors de la mise à jour du prix", e);
         }
     }
+
 
     @Override
     public List<Article> getPrixMisAJour() throws RemoteException{ //Récupere les mises à jours d'aujourd'hui

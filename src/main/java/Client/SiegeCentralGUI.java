@@ -173,6 +173,12 @@ public class SiegeCentralGUI extends JFrame {
                                     "Erreur", JOptionPane.WARNING_MESSAGE);
                             return;
                         }
+                        if (reference <= 0) {
+                            JOptionPane.showMessageDialog(this,
+                                    "La reference doit être supérieur à 0.",
+                                    "Erreur", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
 
                         // Appel RMI individuel pour chaque article
                         stub.mettreAJourPrix(reference, prix);
